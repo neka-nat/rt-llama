@@ -1,0 +1,20 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card {
+    margin-bottom: 1.5rem;
+}
+
+.alert p {
+    margin-bottom: 0;
+}
+
+#video-feed {
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+}
