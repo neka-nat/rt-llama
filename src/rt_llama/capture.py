@@ -24,7 +24,7 @@ def capture_loop(camera_index: int = 0):
             cat_image = cv2.vconcat(image_history)
             image_base64 = base64.b64encode(cv2.imencode('.jpg', cat_image)[1].tobytes()).decode('utf-8')
             time_start = time.time()
-            res = image_response(image_base64)
+            res, _ = image_response(image_base64)
             time_end = time.time()
             print(f"time: {time_end - time_start:.2f}s: {res}")
         time.sleep(0.1)

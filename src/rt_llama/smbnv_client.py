@@ -22,14 +22,15 @@ _prompt = """画像内に見えている人物がどのような作業を行っ�
 
 ## 説明する際の注意点
 * 作業者は作業手順書を元に作業を行っています。
-* どのような作業をしているか説明してください。
-* 作業手順書の各ステップで指差し確認を行う必要があるため、指差し確認が認識できた場合、「ヨシッ！確認」と出力してください。
+* 写っている作業者がどのような状態か、どのような作業をしているか説明してください。
+* 作業手順書の各ステップで指差し確認を行う必要があるため、人差し指での指差し確認が認識できた場合、yoshi_checkをtrueにしてください。
 
 
 ## 出力形式
 ```json
 {
-    "description": "<人物の作業の説明 or None>"
+    "description": "<人物の作業の説明 or None>",
+    "yoshi_check": <true or false>
 }
 ```
 
@@ -39,7 +40,7 @@ _prompt = """画像内に見えている人物がどのような作業を行っ�
 """
 
 
-def image_response(image_base64: str) -> str:
+def image_response(image_base64: str) -> tuple[str, bool]:
     try:
         client = _get_sambanova_client()
         response = client.chat.completions.create(
@@ -63,7 +64,8 @@ def image_response(image_base64: str) -> str:
             top_p=0.1
         )
         content = response.choices[0].message.content
-        return json.loads(re.search(r"```json(.*)```", content, re.DOTALL).group(1))["description"]
+        content_dict = json.loads(re.search(r"```json(.*)```", content, re.DOTALL).group(1))
+        return content_dict["description"], content_dict["yoshi_check"]
     except Exception as e:
         print(e)
-        return None
+        return None, False

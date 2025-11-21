@@ -2,12 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoFeed = document.getElementById('video-feed');
     const streamBtn = document.getElementById('stream-btn');
     const responseText = document.getElementById('response-text');
+    const responseHistory = document.getElementById('response-history');
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
+    const yoshiOverlay = document.getElementById('yoshi-overlay');
 
     let isStreaming = false;
     let ws;
     let streamInterval;
+    const maxHistory = 10;
 
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
@@ -46,7 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         ws.onmessage = (event) => {
-            responseText.textContent = event.data;
+            const data = JSON.parse(event.data);
+            responseText.textContent = data.description;
+            
+            if (data.yoshi_found) {
+                yoshiOverlay.style.display = 'flex';
+            } else {
+                yoshiOverlay.style.display = 'none';
+            }
+
+            // Add to history
+            const newHistoryItem = document.createElement('p');
+            newHistoryItem.textContent = data.description;
+            responseHistory.prepend(newHistoryItem);
+
+            // Limit history
+            if (responseHistory.children.length > maxHistory) {
+                responseHistory.removeChild(responseHistory.lastChild);
+            }
         };
 
         ws.onclose = () => {
@@ -56,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ws.onerror = (error) => {
             console.error("WebSocket error: ", error);
-            responseText.textContent = "An error occurred with the connection.";
+responseText.textContent = "An error occurred with the connection.";
             stopStreaming();
         };
     }
@@ -74,5 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         streamBtn.textContent = "Start Streaming";
         streamBtn.classList.remove('btn-danger');
         streamBtn.classList.add('btn-success');
+        yoshiOverlay.style.display = 'none';
     }
 });

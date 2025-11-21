@@ -1,4 +1,8 @@
 import uvicorn
+import json
+import cv2
+import numpy as np
+import base64
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -27,8 +31,21 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             # The data is a base64 encoded image URL, so we need to remove the prefix
             image_base64 = data.split(',')[1]
-            description = image_response(image_base64)
-            await websocket.send_text(description)
+
+            # Decode base64 image
+            nparr = np.frombuffer(base64.b64decode(image_base64), np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Resize the frame to 640x480
+            resized_frame = cv2.resize(frame, (640, 480))
+
+            # Encode the resized frame back to base64
+            _, buffer = cv2.imencode('.jpg', resized_frame)
+            resized_image_base64 = base64.b64encode(buffer).decode('utf-8')
+            
+            description, yoshi_found = image_response(resized_image_base64)
+            response = {"description": description, "yoshi_found": yoshi_found}
+            await websocket.send_text(json.dumps(response))
     except WebSocketDisconnect:
         print("Client disconnected")
     except Exception as e:
