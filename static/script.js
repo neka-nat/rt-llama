@@ -60,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Add to history
             const newHistoryItem = document.createElement('p');
-            newHistoryItem.textContent = data.description;
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString();
+            newHistoryItem.textContent = `[${timestamp}] ${data.description}`;
             responseHistory.prepend(newHistoryItem);
 
             // Limit history
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ws.onerror = (error) => {
             console.error("WebSocket error: ", error);
-responseText.textContent = "An error occurred with the connection.";
+            responseText.textContent = "An error occurred with the connection.";
             stopStreaming();
         };
     }
